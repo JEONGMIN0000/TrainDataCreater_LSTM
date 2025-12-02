@@ -16,13 +16,26 @@ def fetch_rf (code: str, col_name: str, year: int) -> pd.DataFrame:
     dfs = []
 
     date_ranges = [
-        (f"{year}01010000", f"{year}06302350"),  # 1~6월
-        (f"{year}07010000", f"{year}12312350"),  # 7~12월
-    ]
+    (f"{year}01010000", f"{year}01312350"),  # 1월
+    (f"{year}02010000", f"{year}02292350"),  # 2월 (윤년 반영하려면 별도 코드 필요)
+    (f"{year}03010000", f"{year}03312350"),  # 3월
+    (f"{year}04010000", f"{year}04302350"),  # 4월
+    (f"{year}05010000", f"{year}05312350"),  # 5월
+    (f"{year}06010000", f"{year}06302350"),  # 6월
+    (f"{year}07010000", f"{year}07312350"),  # 7월
+    (f"{year}08010000", f"{year}08312350"),  # 8월
+    (f"{year}09010000", f"{year}09302350"),  # 9월
+    (f"{year}10010000", f"{year}10312350"),  # 10월
+    (f"{year}11010000", f"{year}11302350"),  # 11월
+    (f"{year}12010000", f"{year}12312350"),  # 12월
+]
+
 
     #데이터 조회
-    for(start_date, end_date) in date_ranges: 
+    for(start_date, end_date) in date_ranges:         
         data_list = hrfcodict_list('rf', code, start_date, end_date)
+        print(start_date, end_date)
+        print(data_list[0], data_list[-1])
         if not data_list:
             continue
         df = pd.DataFrame(data_list)
@@ -49,9 +62,20 @@ def fetch_wl (code: str, wl_name: str, year: int) -> pd.DataFrame:
     dfs = []
 
     date_ranges = [
-        (f"{year}01010000", f"{year}06302350"),  # 1~6월
-        (f"{year}07010000", f"{year}12312350"),  # 7~12월
-    ]
+    (f"{year}01010000", f"{year}01312350"),  # 1월
+    (f"{year}02010000", f"{year}02282350"),  # 2월 (윤년 반영하려면 별도 코드 필요)
+    (f"{year}03010000", f"{year}03312350"),  # 3월
+    (f"{year}04010000", f"{year}04302350"),  # 4월
+    (f"{year}05010000", f"{year}05312350"),  # 5월
+    (f"{year}06010000", f"{year}06302350"),  # 6월
+    (f"{year}07010000", f"{year}07312350"),  # 7월
+    (f"{year}08010000", f"{year}08312350"),  # 8월
+    (f"{year}09010000", f"{year}09302350"),  # 9월
+    (f"{year}10010000", f"{year}10312350"),  # 10월
+    (f"{year}11010000", f"{year}11302350"),  # 11월
+    (f"{year}12010000", f"{year}12312350"),  # 12월
+]
+
 
     # 유량 컬럼명 (예: 성남시(궁내교)_WL -> 성남시(궁내교)_Q)
     q_name = wl_name.replace('_WL', '_Q')
@@ -59,6 +83,9 @@ def fetch_wl (code: str, wl_name: str, year: int) -> pd.DataFrame:
     #데이터 조회
     for(start_date, end_date) in date_ranges: 
         data_list = hrfcodict_list('wl', code, start_date, end_date)
+        
+        print(start_date, end_date)
+        print(data_list[0], data_list[-1])
         if not data_list:
             continue
         df = pd.DataFrame(data_list)
@@ -170,7 +197,7 @@ def build_year_dataset(year:int, out_dir:str="./output"):
 
 
     out_path = os.path.join(out_dir, f"{year}_dataset.csv")
-    base_df.to_csv(out_path, index=False, encoding='cp949') # 엑셀에서 한글 깨지지 않게 인코딩
+    base_df.to_csv(out_path, index=False, encoding='utf-8-sig') # 엑셀에서 한글 깨지지 않게 인코딩
 
     print(f"[저장 완료] {out_path}")
 
