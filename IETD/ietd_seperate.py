@@ -212,13 +212,89 @@ def cut_interest_level_instants(df: pd.DataFrame, wl_col: str, threshold: float)
     return df_cut
 
 
-def process_miet_dir_to_ietd(
-    miet_dir: str,
-    out_dir: str,
+def cut_interest_level_window6h(
+    df: pd.DataFrame,
     wl_col: str,
     threshold: float,
-    skip_empty: bool = True
-):
+    window_hours: float = 6.0,
+    pre_hours: float = 2.0,
+) -> pd.DataFrame | None:
+    """
+    1) wl_col이 threshold 이상인 구간이 있는지 확인
+    2) 그 중 피크 수위 시각(peak)을 anchor로 잡고
+    3) 앞 pre_hours, 뒤 (window_hours - pre_hours) 만큼 붙여서
+       총 window_hours 시간 길이의 구간을 잘라 반환.
+
+    - df: 한 MIET 강우사상 CSV (time 컬럼 포함)
+    - wl_col: 수위 컬럼 이름
+    - threshold: 관심수위
+    """
+
+    if "time" not in df.columns:
+        raise ValueError("DataFrame에 'time' 컬럼이 필요합니다.")
+
+    # 1) 시간 파싱 + 인덱스로 설정
+    df = df.copy()
+    df["time"] = pd.to_datetime(df["time"], errors="coerce")
+    df = df.set_index("time").sort_index()
+
+    # 2) 수위 컬럼 숫자로 변환
+    s = df[wl_col].astype(str).str.replace(",", "", regex=False).str.strip()
+    wl_numeric = pd.to_numeric(s, errors="coerce")
+
+    cond = wl_numeric >= float(threshold)
+
+    if not cond.any():
+        # 관심수위 도달 안 한 강우사상
+        return None
+
+    # 3) 관심수위 이상 구간에서 피크 찾기
+    wl_exceed = wl_numeric[cond]
+    peak_idx = wl_exceed.idxmax()      # DatetimeIndex (피크 시각)
+    peak_time = peak_idx
+
+    # 4) 6시간 윈도우 계산
+    post_hours = window_hours - pre_hours
+    ideal_start = peak_time - pd.Timedelta(hours=pre_hours)
+    ideal_end   = peak_time + pd.Timedelta(hours=post_hours)
+
+    # 5) 이벤트(이 파일) 전체 시간 범위
+    event_start = df.index.min()
+    event_end   = df.index.max()
+
+    # 먼저 start를 이벤트 범위 안으로
+    start = max(ideal_start, event_start)
+    end   = start + pd.Timedelta(hours=window_hours)
+
+    # end가 이벤트 끝을 넘으면 뒤에서 다시 맞춰줌
+    if end > event_end:
+        end = event_end
+        start = end - pd.Timedelta(hours=window_hours)
+
+    # 실제 길이가 여전히 부족하면 스킵
+    actual_hours = (end - start).total_seconds() / 3600.0
+    if actual_hours < window_hours - 1e-6:
+        return None
+
+    # 6) 최종 슬라이싱
+    df_win = df.loc[start:end].copy()
+
+    # 수위 컬럼은 숫자형으로 덮어쓰기 (선택)
+    df_win[wl_col] = wl_numeric.loc[df_win.index]
+
+    # time 컬럼 다시 넣어두면 CSV로 저장하기 편함
+    df_win = df_win.reset_index().rename(columns={"time": "time"})
+
+    return df_win
+
+
+def process_miet_dir_to_ietd(
+        miet_dir: str,
+        out_dir: str,
+        wl_col: str,
+        threshold: float,
+        skip_empty: bool = True
+    ):
     os.makedirs(out_dir, exist_ok=True)
 
     for fname in os.listdir(miet_dir):
@@ -248,6 +324,55 @@ def process_miet_dir_to_ietd(
         out_path = os.path.join(out_dir, fname)
         df_cut.to_csv(out_path, index=False, encoding="utf-8-sig")
         print(f"[SAVE] {out_path} rows={len(df_cut)}")
+
+    
+def process_miet_dir_to_ietd_window6h(
+    miet_dir: str,
+    out_dir: str,
+    wl_col: str,
+    threshold: float,
+    window_hours: float = 6.0,
+    pre_hours: float = 2.0,
+    skip_empty: bool = True,
+    ):
+    """
+    MIET 폴더(miet_dir) 안의 각 강우사상 CSV에 대해:
+    - 관심수위(threshold)를 넘는 이벤트가 있는 경우
+    - 피크 시각 기준 6시간(window_hours) 구간으로 잘라서 out_dir에 저장
+    """
+
+    os.makedirs(out_dir, exist_ok=True)
+
+    for fname in os.listdir(miet_dir):
+        if not fname.lower().endswith(".csv"):
+            continue
+
+        in_path = os.path.join(miet_dir, fname)
+
+        # 🔍 자동 인코딩 감지
+        encoding = detect_encoding(in_path)
+        print(f"[INFO] {fname} detected encoding = {encoding}")
+
+        # CSV 로드
+        df = pd.read_csv(in_path, encoding=encoding)
+
+        # 6시간 윈도우 자르기
+        df_win = cut_interest_level_window6h(
+            df=df,
+            wl_col=wl_col,
+            threshold=threshold,
+            window_hours=window_hours,
+            pre_hours=pre_hours,
+        )
+
+        if (df_win is None or df_win.empty) and skip_empty:
+            print(f"[SKIP] {fname} : 관심수위 도달 없음 또는 6시간 윈도우 생성 실패")
+            continue
+
+        # 출력 파일 경로 (원래 이름 그대로 쓰거나, 접미어를 붙여도 됨)
+        out_path = os.path.join(out_dir, fname)
+        df_win.to_csv(out_path, index=False, encoding="utf-8-sig")
+        print(f"[SAVE] {out_path} rows={len(df_win)}")
 
 
 if __name__ == "__main__":
@@ -284,9 +409,18 @@ if __name__ == "__main__":
 
         ietd_gn_dir = os.path.join(base_dir, "IETD", f"{name} {year} 학습데이터 관심 강우사상({MIET})")
 
-        process_miet_dir_to_ietd(
+        # process_miet_dir_to_ietd(
+        #     miet_dir=miet_gn_dir,
+        #     out_dir=ietd_gn_dir,
+        #     wl_col=wl_col,
+        #     threshold=threshold
+        # )
+
+        process_miet_dir_to_ietd_window6h(
             miet_dir=miet_gn_dir,
             out_dir=ietd_gn_dir,
             wl_col=wl_col,
-            threshold=threshold
+            threshold=threshold,
+            window_hours=6.0,   # 전체 6시간
+            pre_hours=2.0,      # 피크 이전 2h + 이후 4h
         )
