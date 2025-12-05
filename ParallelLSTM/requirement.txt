@@ -1,0 +1,22 @@
+import os
+# os.chdir('/root/jupyter_notebook/keras/sungnam')
+# !pwd
+# !sudo timedatectl set-timezone Asia/Seoul
+# !date
+
+# Keras / Tensorflow 외 설치 Package
+# !pip install pandas
+# !pip install scikit-learn
+# !pip install openpyxl
+# !pip install tabulate
+
+def install_fonts():
+    # 폰트 설치
+    !sudo apt-get -qq -y install fonts-nanum > /dev/null
+    # 폰트 cache 강제 갱신
+    # 정상 설치시 /usr/share/fonts/truetype/nanum: caching... 출력
+    !sudo fc-cache -f -v | grep nanum
+    # matplotlib cache 삭제
+    # 만약 cache를 삭제하지 않은 경우 간혹 한글 폰트를 가져오지 못하는 문제 발생함. 
+    !rm -rf ~/.cache/matplotlib
+
