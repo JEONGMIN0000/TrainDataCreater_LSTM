@@ -56,7 +56,7 @@ def cut_interest_level_window6h(
     1) wl_col이 threshold 이상인 구간이 있는지 확인
     2) 그 중 피크 수위 시각(peak)을 anchor로 잡고
     3) 앞 pre_hours, 뒤 (window_hours - pre_hours) 만큼 붙여서
-       총 window_hours 시간 길이의 구간을 잘라 반환.
+        총 window_hours 시간 길이의 구간을 잘라 반환.
 
     - df: 한 MIET 강우사상 CSV (time 컬럼 포함)
     - wl_col: 수위 컬럼 이름
@@ -121,6 +121,7 @@ def cut_interest_level_window6h(
     return df_win
 
 
+# 관심 수위 이상인 데이터 추출
 def process_miet_dir_to_ietd(
     miet_dir: str, out_dir: str, wl_col: str, threshold: float, skip_empty: bool = True
 ):
@@ -155,6 +156,7 @@ def process_miet_dir_to_ietd(
         print(f"[SAVE] {out_path} rows={len(df_cut)}")
 
 
+# 관심 수위 이상인 데이터 앞뒤 2.4시간씩 데이터 추출
 def process_miet_dir_to_ietd_window6h(
     miet_dir: str,
     out_dir: str,
@@ -204,6 +206,64 @@ def process_miet_dir_to_ietd_window6h(
         print(f"[SAVE] {out_path} rows={len(df_win)}")
 
 
+# 관심 수위를 넘은 데이터가 포함된 파일 추출
+def process_miet_dir_to_ietd_wholefile_if_exceed(
+    miet_dir: str,
+    out_dir: str,
+    wl_col: str,
+    threshold: float,
+    skip_empty: bool = True,
+):
+    """
+    MIET 폴더(miet_dir) 안의 각 강우사상 CSV에 대해:
+    - wl_col이 threshold 이상인 row가 하나라도 있으면
+        => 그 파일 전체를 out_dir에 저장
+    - 없으면 (skip_empty=True인 경우) 스킵
+    """
+
+    os.makedirs(out_dir, exist_ok=True)
+
+    for fname in os.listdir(miet_dir):
+        if not fname.lower().endswith(".csv"):
+            continue
+
+        in_path = os.path.join(miet_dir, fname)
+
+        # 🔍 자동 인코딩 감지
+        encoding = detect_encoding(in_path)
+        print(f"[INFO] {fname} detected encoding = {encoding}")
+
+        # CSV 로드
+        df = pd.read_csv(in_path, encoding=encoding)
+
+        if wl_col not in df.columns:
+            print(f"[WARN] {fname} : '{wl_col}' 컬럼이 없습니다. 스킵합니다.")
+            continue
+
+        # 수위 컬럼 숫자로 변환 (쉼표 제거 등 포함)
+        s = df[wl_col].astype(str).str.replace(",", "", regex=False).str.strip()
+        wl_numeric = pd.to_numeric(s, errors="coerce")
+
+        cond = wl_numeric >= float(threshold)
+
+        if not cond.any():
+            if skip_empty:
+                print(f"[SKIP] {fname} : 관심수위({threshold}) 도달 없음")
+                continue
+            else:
+                # 관심수위 도달 안 해도 빈 DF라도 저장하고 싶다면 여기서 처리
+                pass
+
+        # 관심수위를 한 번이라도 넘었으면 => 파일 전체 저장
+        out_path = os.path.join(out_dir, fname)
+
+        # (선택) 수위 컬럼을 숫자로 덮어쓰고 싶으면:
+        df[wl_col] = wl_numeric
+
+        df.to_csv(out_path, index=False, encoding="utf-8-sig")
+        print(f"[SAVE] {out_path} rows={len(df)}")
+
+
 if __name__ == "__main__":
 
     # 궁내 = "gn", 대곡 = "dg"
@@ -234,14 +294,11 @@ if __name__ == "__main__":
 
         base_dir = ".."
 
-        miet_gn_dir = os.path.join(
-            base_dir, "MIET", f"{year} 학습데이터 강우사상({MIET})"
-        )
+        miet_gn_dir = os.path.join(base_dir, "MIET", f"{year} 강우사상({MIET})")
 
-        ietd_gn_dir = os.path.join(
-            base_dir, "IETD", f"{name} {year} 학습데이터 관심 강우사상({MIET})"
-        )
+        ietd_gn_dir = os.path.join(base_dir, "IETD", f"{year} 관심 강우사상({MIET})")
 
+        # 관심 수위 이상인 데이터 추출
         # process_miet_dir_to_ietd(
         #     miet_dir=miet_gn_dir,
         #     out_dir=ietd_gn_dir,
@@ -249,11 +306,21 @@ if __name__ == "__main__":
         #     threshold=threshold
         # )
 
-        process_miet_dir_to_ietd_window6h(
+        # 관심 수위 이상인 데이터 앞뒤 2.4시간씩 데이터 추출
+        # process_miet_dir_to_ietd_window6h(
+        #     miet_dir=miet_gn_dir,
+        #     out_dir=ietd_gn_dir,
+        #     wl_col=wl_col,
+        #     threshold=threshold,
+        #     window_hours=6.0,  # 전체 6시간
+        #     pre_hours=2.0,  # 피크 이전 2h + 이후 4h
+        # )
+
+        # 관심 수위를 넘은 데이터가 포함된 파일 추출
+        process_miet_dir_to_ietd_wholefile_if_exceed(
             miet_dir=miet_gn_dir,
             out_dir=ietd_gn_dir,
             wl_col=wl_col,
             threshold=threshold,
-            window_hours=6.0,  # 전체 6시간
-            pre_hours=2.0,  # 피크 이전 2h + 이후 4h
+            skip_empty=True,  # 관심수위 도달 못한 이벤트는 스킵
         )
