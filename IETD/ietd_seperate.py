@@ -14,8 +14,7 @@ def infer_dt_minutes(index: pd.DatetimeIndex) -> float:
 # IETD 함수
 def split_rain_events_ietd(
     df: pd.DataFrame,
-    rain_col: str | None = "rf",            # 강우 컬럼명 (옵션)
-    rain_series: pd.Series | None = None,   # ✅ 직접 넣는 강우 시계열 (tfsum 등)
+    rain_col: pd.Series | None = None,   # tfsum 등
     ietd_hours: float = 6.0,                # IETD (시간 단위)
     dt_minutes: float | None = 10.0,        # 자료 시간 간격(분), None이면 자동 추정
     rain_threshold: float = 0.0,            # 유효 강우 임계값 (mm/Δt)
@@ -38,8 +37,7 @@ def split_rain_events_ietd(
 
     IETD 기법에 의한 강우사상 분리.
     - df: DatetimeIndex를 가진 DataFrame (시간 오름차순 가정)
-    - rain_col: df 안에 있는 강우 컬럼명 (rain_series 없을 때 사용)
-    - rain_series: df.index 에 맞는 강우 시계열 (예: 여러 관측소 합 tfsum)
+    - rain_col: 여러 관측소 합 tfsum
     """
 
     if not isinstance(df.index, pd.DatetimeIndex):
@@ -47,17 +45,7 @@ def split_rain_events_ietd(
 
     df = df.sort_index().copy()
 
-    if dt_minutes is None:
-        dt_minutes = infer_dt_minutes(df.index)
-
-    # ✅ 강우 데이터 선택 (Series 우선)
-    if rain_series is not None:
-        # index 맞춰서 정렬 & 정렬된 df.index에 reindex
-        rain_s = rain_series.reindex(df.index).fillna(0.0)
-    else:
-        if rain_col is None:
-            raise ValueError("rain_series가 없으면 rain_col을 지정해야 합니다.")
-        rain_s = df[rain_col].fillna(0.0)
+    rain_s = rain_col.reindex(df.index).fillna(0.0)
 
     # IETD를 time-step 개수로 변환
     ietd_minutes = ietd_hours * 60.0
@@ -76,7 +64,7 @@ def split_rain_events_ietd(
         wet = r > rain_threshold
 
         if wet:
-            # IETD 이상 건기 후 처음 비가 내리면 새로운 이벤트 시작
+            # 처음 비가 내리면 새로운 이벤트 시작
             if dry_steps >= ietd_steps:
                 event_id += 1
             event_ids[i] = event_id
@@ -120,10 +108,10 @@ def process_year_with_ietd(
     station_type: str = "gn",      # "gn" = 궁내, "dg" = 대곡
     ietd_hours: float = 6.0,       # IETD (시간)
     dt_minutes: float = 10.0,      # 자료 시간간격 (분)
-    rain_threshold: float = 0.0,   # rf > rain_threshold 를 강우로 볼지
+    rain_threshold: float = 0.0,   # rf > rain_threshold 
     min_event_depth: float = 0.0,  # 이벤트 최소 누적강우 (mm)
-    pre_hours: float = 6.0,        # 이벤트 앞 패딩
-    post_hours: float = 6.0,       # 이벤트 뒤 패딩
+    add_hours_1: float = 6.0,        # 이벤트 앞 패딩
+    add_hours_2: float = 6.0,        # 이벤트 뒤 패딩
 ):
 
     # 1) 관측소별 수위 컬럼 / 관심수위 설정
@@ -169,8 +157,7 @@ def process_year_with_ietd(
     # 6) IETD로 강우사상 분리
     df_evt = split_rain_events_ietd(
         df,
-        rain_col=None,        
-        rain_series=tfsum,
+        rain_col=tfsum,
         ietd_hours=ietd_hours,
         dt_minutes=dt_minutes,
         rain_threshold=rain_threshold,
@@ -179,7 +166,8 @@ def process_year_with_ietd(
     )
 
     # 7) 이벤트 중, 관심수위 이상 도달한 사상만 골라서 ±6시간 후 저장
-    out_dir = f"./{year}_학습데이터_{name}_IETD"
+    # out_dir = f"./{year}_학습데이터_{name}_IETD"
+    out_dir = f"./{year}_학습데이터"
     os.makedirs(out_dir, exist_ok=True)
 
     total_events = 0
@@ -188,19 +176,22 @@ def process_year_with_ietd(
     for id, group in df_evt.groupby("event_id", dropna=True):
         total_events += 1
 
-        # (1) 이 이벤트 시간 범위
+        # (1) 이벤트 시간 범위
         event_start = group.index.min()
         event_end = group.index.max()
 
-        # (2) 이 이벤트 내에서 관심수위 이상 도달 여부 확인
+        # (2) 이벤트 내에서 관심수위 이상 도달 여부 확인
         over = group[wl_col] >= wl_threshold
         if not over.any():
             # 관심수위에 도달하지 않은 이벤트는 스킵
             continue
 
         # (3) 관심수위 포함된 이벤트면 원본 df 기준으로 ±6시간 확장
-        start_pad = max(df.index.min(), event_start - pd.Timedelta(hours=pre_hours))
-        end_pad = min(df.index.max(), event_end + pd.Timedelta(hours=post_hours))
+        start_pad = max(df.index.min(), event_start - pd.Timedelta(hours=add_hours_1))
+        end_pad = min(df.index.max(), event_end + pd.Timedelta(hours=add_hours_2))
+
+        print(f"[start_pad] {start_pad} ")
+        print(f"[end_pad] {end_pad} ")
 
         event_df = df.loc[start_pad:end_pad].reset_index()
 
@@ -221,10 +212,10 @@ if __name__ == "__main__":
         process_year_with_ietd(
             year=year,
             station_type="gn",      # "gn" or "dg"
-            ietd_hours=6.0,         # 여기만 바꾸면 IETD 조정 가능 (혹은 MIET에 맞춰서)
-            dt_minutes=10.0,
-            rain_threshold=0.0,     # wet = r > 0.0 이면 0보다 큰 강우만 사상으로 인식
-            min_event_depth=0.0,    # 너무 작은 비 제외하려면 예: 3.0 같은 값으로
-            pre_hours=6.0,
-            post_hours=6.0,
+            ietd_hours=6.0,         # IETD (시간)
+            dt_minutes=10.0,        # 자료 시간간격 (분)
+            rain_threshold=0.0,     # rf > rain_threshold 
+            min_event_depth=0.0,    # 이벤트 최소 누적강우 (mm) -> 너무 작은 비 제외하려면 예: 3.0 같은 값으로
+            add_hours_1=6.0,        # 이벤트 앞 패딩
+            add_hours_2=6.0,        # 이벤트 뒤 패딩  
         )
