@@ -47,7 +47,7 @@ for year in range(2014, 2025 + 1): #파일 경로 2014-2025 반복
             else:
                 end_index = df.index[-1]  # 데이터프레임 끝까지 설정
 
-            # print(f"Rainfall Start: {start_index}, Rainfall End: {end_index}")
+            print(f"Rainfall Start: {start_index}, Rainfall End: {end_index}")
 
             # ===== 여기서부터 ±6시간 확장 =====
             start_loc = df.index.get_loc(start_index)
@@ -76,7 +76,7 @@ for year in range(2014, 2025 + 1): #파일 경로 2014-2025 반복
             else:
                 end_index = df.index[-1]  # 데이터프레임 끝까지 설정
 
-            # print(f"Rainfall Start: {start_index}, Rainfall End: {end_index}")
+            print(f"Rainfall Start: {start_index}, Rainfall End: {end_index}")
 
             # ===== 여기서부터 ±6시간 확장 =====
             start_loc = df.index.get_loc(start_index)
@@ -98,4 +98,4 @@ for year in range(2014, 2025 + 1): #파일 경로 2014-2025 반복
 
     results = pd.DataFrame(results, columns=["Start Index", "End Index"])
     year = path.split('/')[-1].split('_')[0]
-    results.to_csv(f'./Rainfall_event_{year}({MIET}).csv')
+    results.to_csv(f'./Rainfall_event_{year}({MIET}).csv', encoding="utf-8-sig")

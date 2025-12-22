@@ -33,10 +33,10 @@ for idx, year in enumerate(years):
         print(i, event_1, event_2)
         rainfall_event = rainfall.loc[event_1[0]:event_1[1]]
 
-        rainfall_event.to_csv(f'{rainfall_folder}/{year} {i+1}번 강우사상.csv')
+        rainfall_event.to_csv(f'{rainfall_folder}/{year} {i+1}번 강우사상.csv', encoding="utf-8-sig")
         print(f'{year} {i+1}번 강우사상 저장')
 
         non_rainfall_event = rainfall.loc[event_1[1]:event_2[0]]
 
-        non_rainfall_event.to_csv(f'{non_rainfall_folder}/{year} {i+1}번 무강우사상.csv')
+        non_rainfall_event.to_csv(f'{non_rainfall_folder}/{year} {i+1}번 무강우사상.csv', encoding="utf-8-sig")
         print(f'{year} {i+1}번 무강우사상 저장')
