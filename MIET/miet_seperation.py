@@ -1,8 +1,24 @@
 import os
 import pandas as pd
 
-miet_data = [86, 61, 80, 96, 92, 74, 62, 98, 99, 69, 95, 97]
+# 기본 
+# miet_data = [86, 61, 80, 96, 92, 74, 62, 98, 99, 69, 95, 97]
+
+# 궁내교 컬럼만 유지 할 때
+miet_data = [85, 63, 82, 97, 92, 73, 59, 99, 88, 70, 95, 96]
+
 years = range(2014, 2025 + 1)
+
+#궁내교 컬럼
+keep_cols = [
+    '성남시(대장동)',
+    '성남시(구미초교)',
+    '성남시(한국학중앙연구원)',
+    '성남시(궁내교)_WL',
+    '성남시(궁내교)_Q',
+    '궁내교_Ti'
+]
+
 
 # Target_dam = '궁내' # 대곡 , 궁내 
 for idx, year in enumerate(years):
@@ -31,12 +47,25 @@ for idx, year in enumerate(years):
         else:
             event_2 = list(event.iloc[-1])    
         print(i, event_1, event_2)
-        rainfall_event = rainfall.loc[event_1[0]:event_1[1]]
+
+        # 기본
+
+        # rainfall_event = rainfall.loc[event_1[0]:event_1[1]]
+
+        # rainfall_event.to_csv(f'{rainfall_folder}/{year} {i+1}번 강우사상.csv', encoding="utf-8-sig")
+        # print(f'{year} {i+1}번 강우사상 저장')
+
+        # non_rainfall_event = rainfall.loc[event_1[1]:event_2[0]]
+
+        # non_rainfall_event.to_csv(f'{non_rainfall_folder}/{year} {i+1}번 무강우사상.csv', encoding="utf-8-sig")
+        # print(f'{year} {i+1}번 무강우사상 저장')
+
+
+        # 궁내교 컬럼만 유지하면서 강우 분리저장 ---------------------------------------
+
+        rainfall_event = rainfall.loc[event_1[0]:event_1[1], keep_cols]
 
         rainfall_event.to_csv(f'{rainfall_folder}/{year} {i+1}번 강우사상.csv', encoding="utf-8-sig")
         print(f'{year} {i+1}번 강우사상 저장')
 
-        non_rainfall_event = rainfall.loc[event_1[1]:event_2[0]]
-
-        non_rainfall_event.to_csv(f'{non_rainfall_folder}/{year} {i+1}번 무강우사상.csv', encoding="utf-8-sig")
-        print(f'{year} {i+1}번 무강우사상 저장')
+        # ----------------------------------------------------------------------------
