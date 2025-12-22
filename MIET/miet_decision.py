@@ -2,8 +2,12 @@ import pandas as pd
 import numpy as np
 import matplotlib.pyplot as plt
 
-# offset (10분 간격이면  6시간 = 보통 36 step)
-offset = 36
+#6시간
+# # offset (10분 간격이면  6시간 = 보통 36 step)
+# offset = 36
+
+#1시간
+offset = 6
 
 # target_dam = '궁내' # 대곡 , 궁내
 column=['time','서울시(대곡교)','성남시(성남북초교)','광주시(남한산초교)','성남시(대장동)','성남시(구미초교)','성남시(한국학중앙연구원)','성남시(궁내교)_WL','성남시(궁내교)_Q','서울시(대곡교)_WL','서울시(대곡교)_Q','대곡교_Ti','궁내교_Ti']

@@ -296,7 +296,8 @@ if __name__ == "__main__":
 
         miet_gn_dir = os.path.join(base_dir, "MIET", f"{year} 강우사상({MIET})")
 
-        ietd_gn_dir = os.path.join(base_dir, "IETD", f"{year} 관심 강우사상({MIET})")
+        # ietd_gn_dir = os.path.join(base_dir, "IETD", f"{year} 관심 강우사상({MIET})")
+        gn_dir = os.path.join(base_dir, "MIET", f"{year} 관심 강우사상({MIET})")
 
         # 관심 수위 이상인 데이터 추출
         # process_miet_dir_to_ietd(
@@ -319,7 +320,7 @@ if __name__ == "__main__":
         # 관심 수위를 넘은 데이터가 포함된 파일 추출
         process_miet_dir_to_ietd_wholefile_if_exceed(
             miet_dir=miet_gn_dir,
-            out_dir=ietd_gn_dir,
+            out_dir=gn_dir,
             wl_col=wl_col,
             threshold=threshold,
             skip_empty=True,  # 관심수위 도달 못한 이벤트는 스킵

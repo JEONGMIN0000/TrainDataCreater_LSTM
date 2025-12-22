@@ -10,13 +10,13 @@ import matplotlib.pyplot as plt
 station_type = ["gn","dg"]
 
 # IETD 폴더 경로
-file_dir = r"./IETD"   
+file_dir = r"./MIET"   
 
 # 한글 폰트 (윈도우 기준: 맑은 고딕)
 plt.rcParams["font.family"] = "Malgun Gothic"
 plt.rcParams["axes.unicode_minus"] = False
 
-# ---------- 2. IETD 폴더 안 모든 CSV 찾기 ----------
+# ---------- 2. MIET 폴더 안 모든 CSV 찾기 ----------
 
 file_pattern = os.path.join(file_dir, "**", "*.csv")
 csv_file = glob.glob(file_pattern,recursive=True)
