@@ -2,26 +2,23 @@ import pandas as pd
 import numpy as np
 import matplotlib.pyplot as plt
 
-# 6시간
-# # offset (10분 간격이면  6시간 = 보통 36 step)
-# offset = 36
 
-# 1시간
-offset = 6
+# 파일 행 증강 n시간 (10분 간격이면  1시간 = 보통 6 step)
+offset = 1
 
 # target_dam = '궁내' # 대곡 , 궁내
 
 # 기본
-# column=['time','서울시(대곡교)','성남시(성남북초교)','광주시(남한산초교)','성남시(대장동)','성남시(구미초교)','성남시(한국학중앙연구원)','성남시(궁내교)_WL','성남시(궁내교)_Q','서울시(대곡교)_WL','서울시(대곡교)_Q','대곡교_Ti','궁내교_Ti']
-# col_rf = ['서울시(대곡교)','성남시(성남북초교)','광주시(남한산초교)','성남시(대장동)','성남시(구미초교)','성남시(한국학중앙연구원)']
+column=['time','서울시(대곡교)','성남시(성남북초교)','광주시(남한산초교)','성남시(대장동)','성남시(구미초교)','성남시(한국학중앙연구원)','성남시(궁내교)_WL','성남시(궁내교)_Q','서울시(대곡교)_WL','서울시(대곡교)_Q','대곡교_Ti','궁내교_Ti']
+col_rf = ['서울시(대곡교)','성남시(성남북초교)','광주시(남한산초교)','성남시(대장동)','성남시(구미초교)','성남시(한국학중앙연구원)']
 
 # 궁내교 컬럼만
-column=['time','성남시(대장동)','성남시(구미초교)','성남시(한국학중앙연구원)','성남시(궁내교)_WL','성남시(궁내교)_Q','궁내교_Ti']
-col_rf = ['성남시(대장동)','성남시(구미초교)','성남시(한국학중앙연구원)']
+# column=['time','성남시(대장동)','성남시(구미초교)','성남시(한국학중앙연구원)','성남시(궁내교)_WL','성남시(궁내교)_Q','궁내교_Ti']
+# col_rf = ['성남시(대장동)','성남시(구미초교)','성남시(한국학중앙연구원)']
 
 #파일 경로
 # path = f'../yearly_dataset/2014_dataset.csv'
-for year in range(2014, 2025 + 1): #파일 경로 2014-2025 반복
+for year in range(2014, 2026 + 1): #파일 경로 2014-2025 반복
     path = f'../yearly_dataset/{year}_dataset.csv'
 
 
@@ -59,12 +56,12 @@ for year in range(2014, 2025 + 1): #파일 경로 2014-2025 반복
 
             print(f"Rainfall Start: {start_index}, Rainfall End: {end_index}")
 
-            # ===== 여기서부터 ±6시간 확장 =====
+            # ===== 여기서부터 ±n시간 확장 =====
             start_loc = df.index.get_loc(start_index)
             end_loc = df.index.get_loc(end_index)
 
-            ext_start_loc = max(0, start_loc - offset)          # 앞 6시간
-            ext_end_loc = min(len(df) - 1, end_loc + offset)    # 뒤 6시간
+            ext_start_loc = max(0, start_loc - offset)          # 앞 n시간
+            ext_end_loc = min(len(df) - 1, end_loc + offset)    # 뒤 n시간
 
             ext_start_index = df.index[ext_start_loc]
             ext_end_index = df.index[ext_end_loc]
@@ -88,7 +85,7 @@ for year in range(2014, 2025 + 1): #파일 경로 2014-2025 반복
 
             print(f"Rainfall Start: {start_index}, Rainfall End: {end_index}")
 
-            # ===== 여기서부터 ±6시간 확장 =====
+            # ===== 여기서부터 ±n시간 확장 =====
             start_loc = df.index.get_loc(start_index)
             end_loc = df.index.get_loc(end_index)
 
