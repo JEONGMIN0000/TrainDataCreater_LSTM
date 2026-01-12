@@ -1,6 +1,7 @@
 import os
 import pandas as pd
 
+import calendar 
 from collect import hrfcodict_list
 from util import thissen_DG, thissen_GN
 from const_sungnam import (RF_OBSCD, RF_COL_NAME, DG_THISSEN_AREA, GN_THISSEN_AREA, 
@@ -17,7 +18,7 @@ def fetch_rf (code: str, col_name: str, year: int) -> pd.DataFrame:
 
     date_ranges = [
     (f"{year}01010000", f"{year}01312350"),  # 1월
-    (f"{year}02010000", f"{year}02292350"),  # 2월 (윤년 반영하려면 별도 코드 필요)
+    (f"{year}02010000", f"{year}02{calendar.monthrange(year, 2)[1]:02d}2350"),  # 2월 (윤년 반영)
     (f"{year}03010000", f"{year}03312350"),  # 3월
     (f"{year}04010000", f"{year}04302350"),  # 4월
     (f"{year}05010000", f"{year}05312350"),  # 5월
@@ -63,7 +64,7 @@ def fetch_wl (code: str, wl_name: str, year: int) -> pd.DataFrame:
 
     date_ranges = [
     (f"{year}01010000", f"{year}01312350"),  # 1월
-    (f"{year}02010000", f"{year}02282350"),  # 2월 (윤년 반영하려면 별도 코드 필요)
+    (f"{year}02010000", f"{year}02{calendar.monthrange(year, 2)[1]:02d}2350"),  # 2월 (윤년 반영)
     (f"{year}03010000", f"{year}03312350"),  # 3월
     (f"{year}04010000", f"{year}04302350"),  # 4월
     (f"{year}05010000", f"{year}05312350"),  # 5월
