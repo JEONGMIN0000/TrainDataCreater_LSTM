@@ -25,7 +25,13 @@ for csv_path in csv_file:
 
     # ---------- 3. CSV 읽기 ----------
 
-    df = pd.read_csv(csv_path)
+    # df = pd.read_csv(csv_path)
+    df = pd.read_csv(csv_path, header=0, encoding="utf-8-sig")
+    df.columns = df.columns.str.strip()
+    print("COLUMNS RAW:", list(df.columns))
+    print("FIRST ROW:", df.iloc[0].to_dict())
+
+
 
     # 필요한 컬럼 이름 
     time_col = "time"
@@ -33,6 +39,14 @@ for csv_path in csv_file:
     gn_ti_col = "궁내교_Ti"
     dg_wl_col = "서울시(대곡교)_WL"
     dg_ti_col = "대곡교_Ti"
+
+    
+    required_cols = {time_col, gn_wl_col, gn_ti_col, dg_wl_col, dg_ti_col}
+    missing = required_cols - set(df.columns)
+
+    if missing:
+        print(f"[SKIP] 실데이터 아님: {os.path.basename(csv_path)} -> columns={df.columns.tolist()}")
+        continue
 
     #CSV 하나당 station_type 두 번 반복 ("gn", "dg")
     for station in station_type:
