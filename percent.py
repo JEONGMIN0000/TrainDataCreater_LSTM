@@ -20,33 +20,37 @@ def error_and_similarity(y_true, y_pred, eps=1e-6):
     # 표시용 반올림 (계산값은 유지)
     error_round = np.round(error, 2)        # 셋째 자리 반올림
     similarity_round = np.round(similarity, 1)  # 둘째 자리 반올림
+    y_pred_disp = np.round(y_pred, 2)
 
-    return error_round, similarity_round
+    return error_round, similarity_round, y_pred_disp
 
 
 #------------------------------------------------------------------------------------------------
+
 print('-------------------------------관심수위 궁내교--------------------------------')
 
 # 1시간
 # 관심수위 gn
 y_true = [1.3, 2.31, 1.94, 1.67, 1.23, 1.24]
 y_pred = [1.29112339, 2.45323371887207, 1.397294283, 1.264799953, 1.075569034, 1.23675215244293]
-
-error, similarity = error_and_similarity(y_true, y_pred)
+# 예측값: [1.29 2.45 1.4  1.26 1.08 1.24]
+error, similarity, y_pred_disp = error_and_similarity(y_true, y_pred)
 
 print("관심수위 1시간 오차:", error)
 print("예측 유사도(%):", similarity)
+print("예측값:", y_pred_disp)
 
 print('-------------------------------관심수위 대곡교--------------------------------')
 
 # 관심수위 dg
 y_true = [2.33, 4.53, 2.06, 2.35, 1.91, 2.86]
 y_pred = [2.332614183, 4.68784952163696, 2.011344194, 2.392430544, 1.889179945, 2.40825009346008]
-
-error, similarity = error_and_similarity(y_true, y_pred)
+# 예측값: [2.33 4.69 2.01 2.39 1.89 2.41]
+error, similarity, y_pred_disp = error_and_similarity(y_true, y_pred)
 
 print("관심수위 1시간 오차:", error)
 print("예측 유사도(%):", similarity)
+print("예측값:", y_pred_disp)
 
 print('-------------------------------관심수위 궁내교--------------------------------')
 
@@ -54,46 +58,51 @@ print('-------------------------------관심수위 궁내교--------------------
 # 관심수위 gn
 y_true = [2.16, 2.51, 1.85, 1.36, 1.79, 1.57]
 y_pred = [2.16877079, 2.70704722404479, 1.885674357, 1.361050725, 1.64096868, 1.5458984375]
+# 예측값: [2.17 2.71 1.89 1.36 1.64 1.55]
+error, similarity, y_pred_disp = error_and_similarity(y_true, y_pred)
 
-error, similarity = error_and_similarity(y_true, y_pred)
-
-print("관심수위 3시간 오차:", error)
+print("관심수위 1시간 오차:", error)
 print("예측 유사도(%):", similarity)
+print("예측값:", y_pred_disp)
 
 print('-------------------------------관심수위 대곡교--------------------------------')
 
 # 관심수위 dg
 y_true = [3.6, 4.87, 4.62, 2.91, 3.75, 2.97]
 y_pred = [2.905599833, 5.06946372985839, 4.053395748, 2.537592411, 3.433107615, 3.24981617927551]
+# 예측값: [2.91 5.07 4.05 2.54 3.43 3.25]
+error, similarity, y_pred_disp = error_and_similarity(y_true, y_pred)
 
-error, similarity = error_and_similarity(y_true, y_pred)
-
-print("관심수위 3시간 오차:", error)
+print("관심수위 1시간 오차:", error)
 print("예측 유사도(%):", similarity)
+print("예측값:", y_pred_disp)
 
 #------------------------------------------------------------------------------------------------
+
 print('-------------------------------20년수위 궁내교--------------------------------')
 
 # 1시간
 # 20년수위gn
 y_true = [1.3, 2.31, 1.94, 1.67, 1.23, 1.24]
 y_pred = [1.36598420143127, 2.53227973, 1.443492055, 1.458580375, 1.14335835, 1.31534934]
+# 예측값: [1.37 2.53 1.44 1.46 1.14 1.32]
+error, similarity, y_pred_disp = error_and_similarity(y_true, y_pred)
 
-error, similarity = error_and_similarity(y_true, y_pred)
-
-print("20년수위 1시간 오차:", error)
+print("관심수위 1시간 오차:", error)
 print("예측 유사도(%):", similarity)
+print("예측값:", y_pred_disp)
 
 print('-------------------------------20년수위 대곡교--------------------------------')
 
 # 20년수위dg
 y_true = [2.33, 4.53, 2.06, 2.35, 1.91, 2.86]
 y_pred = [2.3688530921936, 4.819374561, 2.130158663, 2.363722801, 2.005535364, 2.55930686]
+# 예측값: [2.37 4.82 2.13 2.36 2.01 2.56]
+error, similarity, y_pred_disp = error_and_similarity(y_true, y_pred)
 
-error, similarity = error_and_similarity(y_true, y_pred)
-
-print("20년수위 1시간 오차:", error)
+print("관심수위 1시간 오차:", error)
 print("예측 유사도(%):", similarity)
+print("예측값:", y_pred_disp)
 
 print('-------------------------------20년수위 궁내교--------------------------------')
 
@@ -101,66 +110,123 @@ print('-------------------------------20년수위 궁내교---------------------
 # 20년수위gn
 y_true = [2.16, 2.51, 1.85, 1.36, 1.79, 1.57]
 y_pred = [2.17101430892944, 2.936853647, 1.774380565, 1.347494721, 1.686939359, 1.654497743]
+# 예측값: [2.17 2.94 1.77 1.35 1.69 1.65]
+error, similarity, y_pred_disp = error_and_similarity(y_true, y_pred)
 
-error, similarity = error_and_similarity(y_true, y_pred)
-
-print("20년수위3시간 오차:", error)
+print("관심수위 1시간 오차:", error)
 print("예측 유사도(%):", similarity)
+print("예측값:", y_pred_disp)
 
 print('-------------------------------20년수위 대곡교--------------------------------')
 
 # 20년수위dg
 y_true = [3.6, 4.87, 4.62, 2.91, 3.75, 2.97]
 y_pred = [2.92033267021179, 5.173332691, 3.796250343, 2.92291832, 3.17493248, 3.183192968]
+# 예측값: [2.92 5.17 3.8  2.92 3.17 3.18]
+error, similarity, y_pred_disp = error_and_similarity(y_true, y_pred)
 
-error, similarity = error_and_similarity(y_true, y_pred)
-
-print("20년수위 3시간 오차:", error)
+print("관심수위 1시간 오차:", error)
 print("예측 유사도(%):", similarity)
+print("예측값:", y_pred_disp)
 
 #------------------------------------------------------------------------------------------------
+
 print('-------------------------------누적강우 궁내교--------------------------------')
+
+# 1시간
+# 누적강우gn
+y_true = [1.3 , 2.31, 1.94, 1.67, 1.23, 1.24]
+y_pred = [1.263628006 , 2.634861946, 1.418293238, 1.418385625, 1.087397575, 1.211398244]
+# 예측값: [1.26 2.63 1.42 1.42 1.09 1.21]
+error, similarity, y_pred_disp = error_and_similarity(y_true, y_pred)
+
+print("관심수위 1시간 오차:", error)
+print("예측 유사도(%):", similarity)
+print("예측값:", y_pred_disp)
+
+print('-------------------------------누적강우 대곡교--------------------------------')
+
+# 누적강우dg
+y_true = [2.33 , 4.53, 2.06, 2.35, 1.91, 2.86]
+y_pred = [2.335063457 , 4.623164177, 2.026668787, 2.332446337, 1.922489405, 2.456753731]
+# 예측값: [2.34 4.62 2.03 2.33 1.92 2.46]
+error, similarity, y_pred_disp = error_and_similarity(y_true, y_pred)
+
+print("관심수위 1시간 오차:", error)
+print("예측 유사도(%):", similarity)
+print("예측값:", y_pred_disp)
+print('-------------------------------누적강우 궁내교--------------------------------')
+
+# 3시간
+# 누적강우gn
+y_true = [2.16 , 2.51, 1.85, 1.36, 1.79, 1.57]
+y_pred = [1.783856392 , 2.626052856, 1.875209332, 1.329857469, 1.631878495, 1.543645501]
+# 예측값: [1.78 2.63 1.88 1.33 1.63 1.54]
+error, similarity, y_pred_disp = error_and_similarity(y_true, y_pred)
+
+print("관심수위 1시간 오차:", error)
+print("예측 유사도(%):", similarity)
+print("예측값:", y_pred_disp)
+
+print('-------------------------------누적강우 대곡교--------------------------------')
+
+# 누적강우dg
+y_true = [3.6 , 4.87, 4.62, 2.91, 3.75, 2.97]
+y_pred = [2.72322464 , 5.116693974, 4.238863945, 2.879661798, 3.338264942, 3.024617195]
+# 예측값: [2.72 5.12 4.24 2.88 3.34 3.02]
+error, similarity, y_pred_disp = error_and_similarity(y_true, y_pred)
+
+print("관심수위 1시간 오차:", error)
+print("예측 유사도(%):", similarity)
+print("예측값:", y_pred_disp)
+
+#------------------------------------------------------------------------------------------------
+
+print('-------------------------------20년이후 누적강우 궁내교--------------------------------')
 
 # 1시간
 # 누적강우gn
 y_true = [1.3, 2.31, 1.94, 1.67, 1.23, 1.24]
 y_pred = [1.300873637, 2.592343807, 1.322586298, 1.4725492, 1.132968783, 1.411407828]
+# 예측값: [1.3  2.59 1.32 1.47 1.13 1.41]
+error, similarity, y_pred_disp = error_and_similarity(y_true, y_pred)
 
-error, similarity = error_and_similarity(y_true, y_pred)
-
-print("누적강우 1시간 오차:", error)
+print("관심수위 1시간 오차:", error)
 print("예측 유사도(%):", similarity)
-
-print('-------------------------------누적강우 대곡교--------------------------------')
+print("예측값:", y_pred_disp)
+print('-------------------------------20년이후 누적강우 대곡교--------------------------------')
 
 # 누적강우dg
 y_true = [2.33, 4.53, 2.06, 2.35, 1.91, 2.86]
 y_pred = [2.381570578, 4.769173145, 2.067384481, 2.370943069, 1.979139805, 2.517552853]
+# 예측값: [2.38 4.77 2.07 2.37 1.98 2.52]
+error, similarity, y_pred_disp = error_and_similarity(y_true, y_pred)
 
-error, similarity = error_and_similarity(y_true, y_pred)
-
-print("누적강우 1시간 오차:", error)
+print("관심수위 1시간 오차:", error)
 print("예측 유사도(%):", similarity)
+print("예측값:", y_pred_disp)
 
-print('-------------------------------누적강우 궁내교--------------------------------')
+print('-------------------------------20년이후누적강우 궁내교--------------------------------')
 
 # 3시간
 # 누적강우gn
 y_true = [2.16, 2.51, 1.85, 1.36, 1.79, 1.57]
 y_pred = [2.080794811, 2.57658267, 1.741179466, 1.270294189, 1.516449571, 1.459784389]
+# 예측값: [2.08 2.58 1.74 1.27 1.52 1.46]
+error, similarity, y_pred_disp = error_and_similarity(y_true, y_pred)
 
-error, similarity = error_and_similarity(y_true, y_pred)
-
-print("누적강우 3시간 오차:", error)
+print("관심수위 1시간 오차:", error)
 print("예측 유사도(%):", similarity)
+print("예측값:", y_pred_disp)
 
-print('-------------------------------누적강우 대곡교--------------------------------')
+print('-------------------------------20년이후 누적강우 대곡교--------------------------------')
 
 # 누적강우dg
 y_true = [3.6, 4.87, 4.62, 2.91, 3.75, 2.97]
 y_pred = [3.080192566, 5.40976429, 3.995414019, 2.900321245, 3.463635921, 3.312577009]
+# 예측값: [3.08 5.41 4.   2.9  3.46 3.31]
+error, similarity, y_pred_disp = error_and_similarity(y_true, y_pred)
 
-error, similarity = error_and_similarity(y_true, y_pred)
-
-print("누적강우 3시간 오차:", error)
+print("관심수위 1시간 오차:", error)
 print("예측 유사도(%):", similarity)
+print("예측값:", y_pred_disp)
